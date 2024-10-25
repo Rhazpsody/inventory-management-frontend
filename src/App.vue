@@ -6,44 +6,62 @@
         <UserComponent />
       </div>
       <div v-else-if="currentPage === 'item'">
-        <ItemComponent/>
+        <ItemComponent
+          @add-item="handleAddItem"
+          @edit-item="handleEditItem"
+          @delete-item="handleDeleteItem"
+        />
       </div>
       <div v-else-if="currentPage === 'transaction'">
-        <TransactionComponent/>
+        <TransactionComponent />
       </div>
     </div>
   </div>
 </template>
 
 <script>
-  import Navbar from './components/Navbar.vue'
-  import UserComponent from './components/UserList.vue'
-  import ItemComponent from './components/ItemList.vue'
-  import TransactionComponent from './components/Transaction.vue' ;
+import Navbar from "./components/Navbar.vue";
+import UserComponent from "./components/user/UserList.vue";
+import ItemComponent from "./components/item/ItemList.vue";
+import TransactionComponent from "./components/transaction/Transaction.vue";
 
-  export default {
-    components: {
-      Navbar,
-      UserComponent,
-      ItemComponent,
-      TransactionComponent 
+export default {
+  components: {
+    Navbar,
+    UserComponent,
+    ItemComponent,
+    TransactionComponent,
+  },
+  data() {
+    return {
+      currentPage: "user",
+      items: [],
+    };
+  },
+  methods: {
+    handleNavigation(page) {
+      this.currentPage = page;
     },
-    data() {
-      return {
-        currentPage: 'user'
+    handleAddItem(item) {
+      this.items.push(item);
+    },
+    handleEditItem(updatedItem) {
+      const index = this.items.findIndex(
+        (item) => item.kode === updatedItem.kode
+      );
+      if (index !== -1) {
+        this.items.splice(index, 1, updatedItem);
       }
     },
-    methods: {
-      handleNavigation(page) {
-        this.currentPage =  page;
-      }
-    }
-
-  }
+    handleDeleteItem(itemKode) {
+      this.items = this.items.filter((item) => item.kode !== itemKode);
+    },
+  },
+};
 </script>
 
 <style scoped>
-#app{
+#app {
   font-family: Arial, Helvetica, sans-serif;
   display: flex;
   flex-direction: column;
