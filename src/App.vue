@@ -1,77 +1,204 @@
 <template>
   <div id="app">
-    <Navbar @navigate-to="handleNavigation" />
-    <div class="main-content">
-      <div v-if="currentPage === 'user'">
-        <UserComponent />
-      </div>
-      <div v-else-if="currentPage === 'item'">
-        <ItemComponent
-          @add-item="handleAddItem"
-          @edit-item="handleEditItem"
-          @delete-item="handleDeleteItem"
-        />
-      </div>
-      <div v-else-if="currentPage === 'transaction'">
-        <TransactionComponent />
-      </div>
-    </div>
+    <!-- Header Komponen -->
+    <Header
+      :current-role="currentRole"
+      :is-sidebar-visible="isSidebarVisible"
+      @update-role="handleRoleUpdate"
+      @toggle-sidebar="toggleSidebar"
+      @search="handleSearch"
+      @logout="handleLogout"
+    />
+
+    <!-- Sidebar Komponen -->
+    <Sidebar
+      :current-role="currentRole"
+      :is-sidebar-visible="isSidebarVisible"
+      @show-component="handleComponentChange"
+    />
+
+    <!-- Konten Utama -->
+    <main :class="{ 'content-expanded': !isSidebarVisible }">
+      <!-- Tampilkan AdminView jika role adalah admin -->
+      <AdminView
+        v-if="currentRole === 'admin'"
+        :current-component="currentComponent"
+        :items="items"
+        :show-item-form="showItemForm"
+        :selected-item="selectedItem"
+        @update:show-item-form="showItemForm = $event"
+        @save-item="handleSaveItem"
+        @edit-item="handleEditItem"
+        @delete-item="handleDeleteItem"
+      />
+      <!-- Tampilkan UserView jika role adalah user -->
+      <UserView
+        v-if="currentRole === 'user'"
+        :current-component="currentComponent"
+        :items="items"
+      />
+    </main>
+
+    <!-- Modal Notifikasi -->
+    <Modal v-if="showModal" :modal-content="modalContent" @close="closeModal" />
+    <Footer />
   </div>
 </template>
 
 <script>
-import Navbar from "./components/Navbar.vue";
-import UserComponent from "./components/user/UserList.vue";
-import ItemComponent from "./components/item/ItemList.vue";
-import TransactionComponent from "./components/transaction/Transaction.vue";
+import Header from "@/components/dashboard/Header.vue";
+//import Transaction from './components/user/transaction/Transaction.vue'
+//import UserList from  './components/admin/user/UserList.vue'
+//import ItemList from './components/admin/item/ItemList.vue'
+import Footer from "@/components/dashboard/Footer.vue";
+import Sidebar from "@/components/dashboard/Sidebar.vue";
+import AdminView from "@/views/AdminView.vue";
+import UserView from "@/views/UserView.vue";
+import Modal from "@/components/Modal.vue";
 
 export default {
+  name: "App",
   components: {
-    Navbar,
-    UserComponent,
-    ItemComponent,
-    TransactionComponent,
+    Header,
+    Footer,
+    Sidebar,
+    //UserList,
+    //ItemList,
+    AdminView,
+    UserView,
+    //Transaction,
+    Modal,
   },
   data() {
     return {
-      currentPage: "user",
-      items: [],
+      currentRole: "user",
+      currentComponent: "items",
+      isSidebarVisible: true,
+      items: [
+        {
+          code: "1",
+          name: "Printer",
+          description: "Ini adalah printer Canon",
+          stock: 10,
+        },
+        {
+          code: "2",
+          name: "Laptop",
+          description: "Laptop dengan spesifikasi tinggi",
+          stock: 10,
+        },
+        {
+          code: "3",
+          name: "Charger",
+          description: "Charger dengan fast Charging",
+          stock: 10,
+        },
+        {
+          code: "4",
+          name: "Tas Sekolah",
+          description: "Gak tau kenapa ada tas sekolah disini",
+          stock: 10,
+        },
+      ],
+      showItemForm: false,
+      selectedItem: null,
+      showModal: false,
+      modalContent: { title: "", message: "", type: "" },
+      searchQuery: "",
     };
   },
   methods: {
-    handleNavigation(page) {
-      this.currentPage = page;
+    handleRoleUpdate(role) {
+      this.currentRole = role;
+      this.currentComponent = role === "admin" ? "users" : "items";
+      console.log("Role changed to:", role);
     },
-    handleAddItem(item) {
-      this.items.push(item);
+    toggleSidebar() {
+      this.isSidebarVisible = !this.isSidebarVisible;
+      console.log("Sidebar toggled:", this.isSidebarVisible);
     },
-    handleEditItem(updatedItem) {
-      const index = this.items.findIndex(
-        (item) => item.kode === updatedItem.kode
-      );
-      if (index !== -1) {
-        this.items.splice(index, 1, updatedItem);
+    handleComponentChange(component) {
+      this.currentComponent = component;
+      this.showItemForm = false;
+      console.log("Component changed to:", component);
+    },
+    handleSaveItem(item) {
+      if (this.selectedItem) {
+        const index = this.items.findIndex((i) => i.code === item.code);
+        if (index !== -1) {
+          this.items.splice(index, 1, item);
+          this.showNotification(
+            "Sukses",
+            "Item berhasil diperbarui",
+            "success"
+          );
+        }
+      } else {
+        this.items.push(item);
+        this.showNotification("Sukses", "Item berhasil ditambahkan", "success");
       }
+      this.showItemForm = false;
+      this.selectedItem = null;
     },
-    handleDeleteItem(itemKode) {
-      this.items = this.items.filter((item) => item.kode !== itemKode);
+    handleEditItem(item) {
+      this.selectedItem = { ...item };
+      this.showItemForm = true;
+    },
+    handleDeleteItem(code) {
+      this.items = this.items.filter((item) => item.code !== code);
+      this.showNotification("Sukses", "Item berhasil dihapus", "success");
+    },
+    showNotification(title, message, type) {
+      this.modalContent = { title, message, type };
+      this.showModal = true;
+    },
+    closeModal() {
+      this.showModal = false;
+      this.modalContent = { title: "", message: "", type: "" };
+    },
+    handleSearch(query) {
+      this.searchQuery = query;
+    },
+    handleLogout() {
+      console.log("Logged out");
     },
   },
 };
 </script>
 
-<style scoped>
+<style>
 #app {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  color: #2c3e50;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  height: 100vh;
 }
-
 .main-content {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+  padding: 90px 20px 20px;
+  background-color: #f8f9fa;
+  flex: 1;
+  transition: margin-left 0.3s ease;
+}
+.content-expanded {
+  margin-left: 0;
+}
+.sidebar-visible {
+  margin-left: 250px;
+}
+@media (max-width: 768px) {
+  .main-content.sidebar-visible {
+    margin-left: 200px;
+  }
+}
+@media (max-width: 576px) {
+  .main-content {
+    padding: 90px 10px 20px;
+  }
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 </style>
