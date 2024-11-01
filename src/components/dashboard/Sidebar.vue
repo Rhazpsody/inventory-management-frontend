@@ -3,62 +3,60 @@
   <aside :class="['sidebar', { 'sidebar-hidden': !isSidebarVisible }]">
     <!-- Menu untuk Admin -->
     <div v-if="currentRole === 'admin'" class="menu-list">
-      <div 
+      <div
         class="menu-item"
         :class="{ active: currentComponent === 'user' }"
         @click="$emit('show-component', 'users')"
       >
-        <i class="fas fa-users"></i>
+        <i class="bi bi-house-door"></i>
         <span>Kelola User</span>
       </div>
-      
-      <div 
+
+      <div
         class="menu-item"
         :class="{ active: currentComponent === 'item' }"
         @click="$emit('show-component', 'items')"
       >
-        <i class="fas fa-box"></i>
+        <i class="bi bi-box"></i>
         <span>Kelola Barang</span>
       </div>
-      
-      <div 
+
+      <div
         class="menu-item"
         :class="{ active: currentComponent === 'transactions' }"
         @click="$emit('show-component', 'transactions')"
       >
-        <i class="fas fa-exchange-alt"></i>
+        <i class="bi bi-cash"></i>
         <span>Transaksi</span>
       </div>
-      
-      
     </div>
 
     <!-- Menu untuk User -->
     <div v-else class="menu-list">
-      <div 
+      <div
         class="menu-item"
         :class="{ active: currentComponent === 'items' }"
         @click="$emit('show-component', 'items')"
       >
-        <i class="fas fa-box"></i>
+        <i class="bi bi-box"></i>
         <span>Daftar Barang</span>
       </div>
-      
-      <div 
+
+      <div
         class="menu-item"
         :class="{ active: currentComponent === 'transactions' }"
         @click="$emit('show-component', 'transactions')"
       >
-        <i class="fas fa-exchange-alt"></i>
+        <i class="bi bi-cash"></i>
         <span>Transaksi</span>
       </div>
-      
-      <div 
+
+      <div
         class="menu-item"
         :class="{ active: currentComponent === 'history' }"
         @click="$emit('show-component', 'history')"
       >
-        <i class="fas fa-history"></i>
+        <i class="bi bi-clock-history"></i>
         <span>Riwayat</span>
       </div>
     </div>
@@ -67,19 +65,19 @@
 
 <script>
 export default {
-  name: 'Sidebar',
+  name: "Sidebar",
   props: {
     currentRole: {
       type: String,
-      required: true
+      required: true,
     },
     isSidebarVisible: {
       type: Boolean,
-      required: true
-    }
+      required: true,
+    },
   },
-  emits: ['show-component']
-}
+  emits: ["show-component"],
+};
 </script>
 
 <style scoped>
@@ -90,7 +88,7 @@ export default {
   bottom: 0;
   width: 250px;
   background-color: white;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
   z-index: 100;
 }
